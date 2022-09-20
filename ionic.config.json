@@ -1,0 +1,7 @@
+{
+  "name": "sender",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
