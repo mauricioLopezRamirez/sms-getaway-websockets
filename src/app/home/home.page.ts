@@ -9,24 +9,25 @@ import Wss from '@adonisjs/websocket-client';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
-  status = 'nada';
+  status = 'Sin conexión';
   ws: any;
   messages: any;
   constructor(private sms: SMS,) { }
   async ngOnInit() {
     localStorage.setItem('index', '0');
     this.sms.hasPermission();
+    this.iniciar();
   }
 
   async iniciar() {
     this.ws = Wss('ws://smsfree-colombia.herokuapp.com/').connect();
     this.ws.on('open', () => {
-      this.status = 'conexion generada *********';
+      this.status = '** conexión generada **';
     });
     this.messages = this.ws.subscribe('shippingPending');
     this.messages.on('close', (error) => {
-      console.log(error);
-      this.status = 'Conexion perdeda';
+      this.ws = Wss('ws://smsfree-colombia.herokuapp.com/').connect();
+      this.status = 'CONEXIÓN PERDIDA';
     });
     this.messages.on('message', data => {
       this.sendSms(data);
