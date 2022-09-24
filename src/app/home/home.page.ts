@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { SmsManager } from '@byteowls/capacitor-sms';
 import { SMS } from '@awesome-cordova-plugins/sms/ngx';
 import Wss from '@adonisjs/websocket-client';
-
+import { Vibration } from '@awesome-cordova-plugins/vibration/ngx';
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -12,7 +11,7 @@ export class HomePage implements OnInit {
   status = 'Sin conexión';
   ws: any;
   messages: any;
-  constructor(private sms: SMS,) { }
+  constructor(private sms: SMS) { }
   async ngOnInit() {
     localStorage.setItem('index', '0');
     this.sms.hasPermission();
@@ -21,13 +20,15 @@ export class HomePage implements OnInit {
 
   async iniciar() {
     this.ws = Wss('ws://smsfree-colombia.herokuapp.com/').connect();
+    this.messages = this.ws.subscribe('shippingPending');
     this.ws.on('open', () => {
       this.status = '** conexión generada **';
     });
-    this.messages = this.ws.subscribe('shippingPending');
+    this.ws.on('error', (event) => {
+      location.reload();
+    });
     this.messages.on('close', (error) => {
-      this.ws = Wss('ws://smsfree-colombia.herokuapp.com/').connect();
-      this.status = 'CONEXIÓN PERDIDA';
+      location.reload();
     });
     this.messages.on('message', data => {
       this.sendSms(data);
